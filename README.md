@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PharmaManage - Pharmacy Inventory & Billing System
 
-## Getting Started
+PharmaManage is a comprehensive web-based application designed to streamline pharmacy operations. It integrates robust inventory management, a point-of-sale (POS) billing system, and detailed reporting analytics into a single, modern interface. Built with performance and scalability in mind using Next.js 16 and MongoDB.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 📦 Inventory Management
+- **Real-time Stock Tracking**: Monitor medicine quantities, batch numbers, and expiry dates.
+- **Smart Search**: Instantly find medicines by name, brand, or category.
+- **Low Stock Alerts**: Automatic indicators for items running low on stock.
+- **Expiry Management**: Dedicated monitoring for expired or soon-to-expire medicines.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 💳 POS & Billing System
+- **Fast Billing**: Quick-add cart system for efficient over-the-counter sales.
+- **Dynamic Pricing**: Support for GST calculation, global discounts, and threshold-based bulk discounts.
+- **Multiple Payment Modes**: Integrated support for Cash, Card, and UPI payments (via Razorpay).
+- **Professional Invoices**: Auto-generate and print thermal-ready PDF invoices.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 📊 Reports & Analytics
+- **Financial Dashboard**: Visualize total revenue, profit margins, and sales growth.
+- **Data Export**: Export comprehensive sales reports to CSV for external analysis.
+- **Sales History**: Searchable digital archive of all past transactions.
+- **Inventory Insights**: Reports on expired stock and inventory valuation.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Technology Stack
 
-## Learn More
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
+- **Authentication**: [Clerk](https://clerk.com/)
+- **Payments**: Razorpay
+- **Styling**: CSS Modules (Modern, Responsive Design)
+- **Utilities**: 
+  - `jspdf` & `jspdf-autotable` (Invoice Generation)
+  - `date-fns` (Date Formatting)
+  - `lucide-react` (Icons)
 
-To learn more about Next.js, take a look at the following resources:
+## ⚙️ Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Prerequisites
+- Node.js 18+ installed
+- MongoDB installed locally or a MongoDB Atlas connection string
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation
 
-## Deploy on Vercel
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/pharmacy-inventory-billing.git
+   cd pharmacy-inventory-billing
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Configure Environment Variables:**
+   Rename `.env.example` to `.env.local` and add your credentials:
+   ```env
+   MONGODB_URI=mongodb+srv://...
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+   CLERK_SECRET_KEY=sk_test_...
+   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+   ```
+
+4. **Run the Development Server:**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 📄 Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint checks
+
+## 🔒 Security
+
+- **Authentication**: Secure user sessions managed by Clerk.
+- **Data Safety**: Server-side validation for all inventory and billing transactions.
+- **Role-Based Access**: (Configurable via Clerk)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License.

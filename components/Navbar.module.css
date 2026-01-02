@@ -1,0 +1,111 @@
+.navbar {
+    height: 100vh;
+    width: 260px;
+    background-color: hsl(var(--card));
+    border-right: 1px solid hsl(var(--border));
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    transition: all 0.3s ease;
+}
+
+.navbarContent {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem;
+}
+
+.navbarLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    margin-bottom: 2.5rem;
+}
+
+.logoIcon {
+    color: hsl(var(--primary));
+}
+
+.navLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius);
+    color: hsl(var(--muted-foreground));
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.navItem:hover {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--foreground));
+    transform: translateX(4px);
+}
+
+.navItem.active {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    box-shadow: 0 4px 12px hsla(var(--primary), 0.25);
+}
+
+.navbarActions {
+    padding-top: 1.5rem;
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        height: 70px;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid hsl(var(--border));
+        bottom: 0;
+        top: auto;
+    }
+
+    .navbarContent {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+    }
+
+    .navbarLogo,
+    .navbarActions,
+    .navItem span {
+        display: none;
+    }
+
+    .navLinks {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        padding: 0;
+        margin: 0;
+    }
+
+    .navItem {
+        padding: 0.75rem;
+    }
+
+    .navItem:hover {
+        transform: translateY(-2px);
+    }
+}

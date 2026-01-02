@@ -1,0 +1,65 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { UserButton } from '@clerk/nextjs';
+import {
+    LayoutDashboard,
+    Package,
+    CreditCard,
+    BarChart3,
+    Search,
+    Settings
+} from 'lucide-react';
+import styles from './Navbar.module.css';
+
+const Navbar = () => {
+    const pathname = usePathname();
+
+    const navItems = [
+        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+        { name: 'Inventory', href: '/inventory', icon: Package },
+        { name: 'Billing', href: '/billing', icon: CreditCard },
+        { name: 'Reports', href: '/reports', icon: BarChart3 },
+        { name: 'Sales', href: '/sales', icon: Search },
+        { name: 'Settings', href: '/settings', icon: Settings },
+    ];
+
+    if (pathname?.startsWith('/sign-in') || pathname?.startsWith('/sign-up')) {
+        return null;
+    }
+
+    return (
+        <nav className={styles.navbar}>
+            <div className={styles.navbarContent}>
+                <div className={styles.navbarLogo}>
+
+                    <span>PharmaManage</span>
+                </div>
+
+                <div className={styles.navLinks}>
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                            >
+                                <Icon size={22} />
+                                <span>{item.name}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                <div className={styles.navbarActions}>
+                    <UserButton showName afterSignOutUrl="/sign-in" />
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+export default Navbar;

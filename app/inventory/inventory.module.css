@@ -1,0 +1,168 @@
+.inventoryContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    align-items: center;
+}
+
+.searchWrapper {
+    flex: 1;
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: hsl(var(--muted-foreground));
+}
+
+.searchInput {
+    padding-left: 3rem !important;
+}
+
+.filterWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 250px;
+}
+
+.tableWrapper {
+    padding: 0;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th {
+    background-color: hsl(var(--secondary));
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+.medName {
+    display: flex;
+    flex-direction: column;
+}
+
+.batch {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.tag {
+    background-color: hsl(var(--accent));
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.stock {
+    font-weight: 600;
+}
+
+.lowStock {
+    color: hsl(var(--destructive));
+}
+
+.expiry {
+    font-size: 0.875rem;
+}
+
+.expiringSoon {
+    color: hsl(var(--warning));
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionsHeader {
+    text-align: right !important;
+}
+
+.actionBtn {
+    background: none;
+    border: 1px solid hsl(var(--border));
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: hsl(var(--muted-foreground));
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+}
+
+.deleteBtn:hover {
+    background-color: hsla(var(--destructive), 0.1);
+    color: hsl(var(--destructive));
+    border-color: hsla(var(--destructive), 0.2);
+}
+
+.loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem;
+    gap: 1rem;
+    color: hsl(var(--muted-foreground));
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem;
+    gap: 1rem;
+    text-align: center;
+}
+
+@media (max-width: 1024px) {
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tableWrapper {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}
