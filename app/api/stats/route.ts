@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
             createdAt: { $gte: today }
         });
         const todaySalesAmount = todaySales.reduce((acc, sale) => acc + sale.totalAmount, 0);
+        const todayProfit = todaySales.reduce((acc, sale) => acc + (sale.totalProfit || 0), 0);
 
         // 3. Low Stock Count
         const lowStockCount = await Medicine.countDocuments({
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             totalMedicines,
             todaySalesAmount,
+            todayProfit,
             lowStockCount,
             expiringSoonCount
         });

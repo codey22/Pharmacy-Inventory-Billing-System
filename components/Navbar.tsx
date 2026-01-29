@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { SignOutButton } from '@clerk/nextjs';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     Package,
@@ -16,6 +15,17 @@ import styles from './Navbar.module.css';
 
 const Navbar = () => {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            router.push('/sign-in');
+            router.refresh();
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
+    };
 
     const navItems = [
         { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -26,7 +36,7 @@ const Navbar = () => {
         { name: 'Settings', href: '/settings', icon: Settings },
     ];
 
-    if (pathname?.startsWith('/sign-in') || pathname?.startsWith('/sign-up')) {
+    if (pathname?.startsWith('/sign-in')) {
         return null;
     }
 
@@ -56,12 +66,14 @@ const Navbar = () => {
                 </div>
 
                 <div className={styles.navbarActions}>
-                    <SignOutButton redirectUrl="/sign-in">
-                        <button className={styles.navItem} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'inherit' }}>
-                            <LogOut size={22} />
-                            <span>Logout</span>
-                        </button>
-                    </SignOutButton>
+                    <button 
+                        onClick={handleLogout}
+                        className={styles.navItem} 
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'inherit' }}
+                    >
+                        <LogOut size={22} />
+                        <span>Logout</span>
+                    </button>
                 </div>
             </div>
         </nav>

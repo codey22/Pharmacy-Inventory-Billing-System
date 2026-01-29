@@ -14,6 +14,13 @@ export default function SalesSearchPage() {
     const [showInvoiceModal, setShowInvoiceModal] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [settings, setSettings] = useState<any>(null);
+
+    useEffect(() => {
+        fetch('/api/settings')
+            .then(res => res.json())
+            .then(data => setSettings(data));
+    }, []);
 
     const fetchSales = async (query: string) => {
         setLoading(true);
@@ -121,7 +128,7 @@ export default function SalesSearchPage() {
                                         <td style={{ padding: '1rem' }}>
                                             <button
                                                 className="btn btn-outline btn-sm"
-                                                onClick={() => printInvoice(sale)}
+                                                onClick={() => printInvoice(sale, settings)}
                                             >
                                                 <Printer size={16} />
                                                 <span>Print</span>
@@ -175,7 +182,7 @@ export default function SalesSearchPage() {
                             <p style={{ marginBottom: '2rem' }}>Invoice for <strong>{selectedSale.customerName || 'Walk-in'}</strong></p>
 
                             <div className={styles.modalActions}>
-                                <button className="btn btn-primary" onClick={() => printInvoice(selectedSale)}>
+                                <button className="btn btn-primary" onClick={() => printInvoice(selectedSale, settings)}>
                                     <Printer size={20} />
                                     <span>Print Invoice</span>
                                 </button>

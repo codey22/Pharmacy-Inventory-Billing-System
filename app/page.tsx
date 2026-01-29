@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     totalMedicines: 0,
     todaySalesAmount: 0,
+    todayProfit: 0,
     lowStockCount: 0,
     expiringSoonCount: 0
   });
@@ -38,7 +39,8 @@ export default function Dashboard() {
 
   const statCards = [
     { name: 'Total Medicines', value: stats.totalMedicines.toString(), icon: Package, color: styles.wrapperPrimary },
-    { name: "Today's Sales", value: `₹${(stats.todaySalesAmount || 0).toFixed(2)}`, icon: TrendingUp, color: styles.wrapperSuccess },
+    { name: "Today's Sales", value: `₹${(stats.todaySalesAmount || 0).toFixed(2)}`, icon: TrendingUp, color: styles.wrapperPrimary },
+    { name: "Today's Profit", value: `₹${(stats.todayProfit || 0).toFixed(2)}`, icon: TrendingUp, color: styles.wrapperSuccess },
     { name: 'Low Stock', value: stats.lowStockCount.toString(), icon: AlertTriangle, color: styles.wrapperWarning },
     { name: 'Expiring Soon', value: stats.expiringSoonCount.toString(), icon: Clock, color: styles.wrapperDestructive },
   ];

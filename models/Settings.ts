@@ -15,14 +15,14 @@ export interface ISettings {
 
 const SettingsSchema = new Schema<ISettings>(
     {
-        pharmacyName: { type: String, default: 'PharmaManage' },
-        pharmacyAddress: { type: String, default: '123 Healthy Street, Wellness City' },
-        pharmacyPhone: { type: String, default: '+91 9876543210' },
-        pharmacyGstNo: { type: String, default: '27AABCU1234F1Z5' },
-        defaultGstPercent: { type: Number, default: 12 },
-        globalDiscountPercent: { type: Number, default: 5 },
-        thresholdAmount: { type: Number, default: 2000 },
-        thresholdDiscountPercent: { type: Number, default: 2 },
+        pharmacyName: { type: String, default: '' },
+        pharmacyAddress: { type: String, default: '' },
+        pharmacyPhone: { type: String, default: '' },
+        pharmacyGstNo: { type: String, default: '' },
+        defaultGstPercent: { type: Number, default: 0 },
+        globalDiscountPercent: { type: Number, default: 0 },
+        thresholdAmount: { type: Number, default: 0 },
+        thresholdDiscountPercent: { type: Number, default: 0 },
         // razorpayKeyId: { type: String, default: '' }, // Deprecated
         // razorpayKeySecret: { type: String, default: '' }, // Deprecated
     },

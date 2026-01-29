@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export const printInvoice = (sale: any) => {
+export const printInvoice = (sale: any, settings: any) => {
     const doc: any = new jsPDF();
 
     // ================= HEADER & BRANDING =================
@@ -18,17 +18,41 @@ export const printInvoice = (sale: any) => {
 
     doc.setFontSize(20);
     doc.setTextColor(37, 99, 235); // Blue Brand Color
-    doc.text("PharmaManage", headerX, headerY); // Aligned to left margin
+    
+    // Check if store name exists, otherwise default to "PharmaManage" or empty if desired
+    const storeName = settings?.pharmacyName || sale.pharmacyName || "";
+    if (storeName) {
+        doc.text(storeName, headerX, headerY); 
+    }
 
     // Pharmacy Details (Below Name)
     const detailsY = headerY + 8;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105); // Slate-500
-    doc.text("123 Healthy Street, Wellness City", headerX, detailsY);
-    doc.text("Wellness City, 400001", headerX, detailsY + 5);
-    doc.text(`GSTIN: ${sale.pharmacyGstNo || '27AABCU1234F1Z5'}`, headerX, detailsY + 10);
-    doc.text(`Phone: +91 9876543210`, headerX, detailsY + 15);
+
+    let currentY = detailsY;
+
+    // Use settings first, then sale fallback
+    const address = settings?.pharmacyAddress || sale.pharmacyAddress;
+    if (address) {
+        // Handle multiline address
+        const splitAddress = doc.splitTextToSize(address, 80); // Wrap at 80 units
+        doc.text(splitAddress, headerX, currentY);
+        currentY += (splitAddress.length * 5); // Increment Y based on lines
+    }
+
+    const gstNo = settings?.gstNumber || sale.pharmacyGstNo;
+    if (gstNo) {
+        doc.text(`GSTIN: ${gstNo}`, headerX, currentY);
+        currentY += 5;
+    }
+
+    const phone = settings?.contactNumber || sale.pharmacyPhone;
+    if (phone) {
+        doc.text(`Phone: ${phone}`, headerX, currentY);
+        currentY += 5;
+    }
 
     // Invoice Meta (Top Right)
     // Label changed to "Invoice ID:"
@@ -85,14 +109,20 @@ export const printInvoice = (sale: any) => {
     doc.text(`${sale.customerContact || 'N/A'}`, 36, customerY + 14);
 
     // ================= ITEM TABLE =================
-    const tableColumn = ["Item", "Batch", "Exp", "Qty", "Unit Price", "CGST%", "SGST%", "Amount"];
+    // Only show tax columns if there is actually tax
+    const hasTax = sale.totalTax > 0;
+    
+    const tableColumn = hasTax 
+        ? ["Item", "Batch", "Exp", "Qty", "Unit Price", "CGST%", "SGST%", "Amount"]
+        : ["Item", "Batch", "Exp", "Qty", "Unit Price", "Amount"];
+
     const tableRows: any[] = [];
 
     let totalCGST = 0;
     let totalSGST = 0;
 
     sale.items.forEach((item: any) => {
-        const gstRate = item.taxPercent || 12;
+        const gstRate = item.taxPercent || 0;
         const cgstRate = gstRate / 2;
         const sgstRate = gstRate / 2;
 
@@ -103,11 +133,16 @@ export const printInvoice = (sale: any) => {
             item.batchNumber || 'N/A',
             item.expiryDate ? formatDate(item.expiryDate) : 'N/A',
             item.quantity,
-            `Rs. ${item.pricePerUnit.toFixed(2)}`,
-            `${cgstRate}%`,
-            `${sgstRate}%`,
-            `Rs. ${amount.toFixed(2)}`
+            `Rs. ${item.pricePerUnit.toFixed(2)}`
         ];
+
+        if (hasTax) {
+            itemData.push(`${cgstRate}%`);
+            itemData.push(`${sgstRate}%`);
+        }
+
+        itemData.push(`Rs. ${amount.toFixed(2)}`);
+        
         tableRows.push(itemData);
     });
 
@@ -140,7 +175,7 @@ export const printInvoice = (sale: any) => {
             lineColor: [226, 232, 240],
             valign: 'middle'
         },
-        columnStyles: {
+        columnStyles: hasTax ? {
             0: { cellWidth: 40, halign: 'left' },
             1: { halign: 'center' },
             2: { halign: 'center' },
@@ -149,6 +184,13 @@ export const printInvoice = (sale: any) => {
             5: { halign: 'center' },
             6: { halign: 'center' },
             7: { halign: 'right', fontStyle: 'bold' }
+        } : {
+            0: { cellWidth: 50, halign: 'left' },
+            1: { halign: 'center' },
+            2: { halign: 'center' },
+            3: { halign: 'center' },
+            4: { halign: 'right' },
+            5: { halign: 'right', fontStyle: 'bold' }
         }
     });
 
@@ -170,7 +212,7 @@ export const printInvoice = (sale: any) => {
     const rightColX = 135;
     const valueColX = 190;
     const lineHeight = 7;
-    let currentY = finalY;
+    let totalY = finalY;
 
     const subTotal = (sale.totalAmount - (sale.totalTax || 0) + (sale.discount || 0));
 
@@ -178,30 +220,34 @@ export const printInvoice = (sale: any) => {
         doc.setFont("helvetica", isBold ? "bold" : "normal");
         doc.setTextColor(isBold ? 30 : 71, isBold ? 41 : 85, isBold ? 59 : 105);
 
-        doc.text(label, rightColX, currentY);
-        doc.text(value, valueColX, currentY, { align: 'right' });
-        currentY += lineHeight;
+        doc.text(label, rightColX, totalY);
+        doc.text(value, valueColX, totalY, { align: 'right' });
+        totalY += lineHeight;
     };
 
     addTotalRow("Subtotal:", `Rs. ${subTotal.toFixed(2)}`);
-    addTotalRow("CGST:", `Rs. ${totalCGST.toFixed(2)}`);
-    addTotalRow("SGST:", `Rs. ${totalSGST.toFixed(2)}`);
+    
+    if (hasTax) {
+        addTotalRow("CGST:", `Rs. ${totalCGST.toFixed(2)}`);
+        addTotalRow("SGST:", `Rs. ${totalSGST.toFixed(2)}`);
+    }
 
     doc.setDrawColor(226, 232, 240);
-    doc.line(rightColX, currentY - 4, 190, currentY - 4);
+    doc.line(rightColX, totalY - 4, 190, totalY - 4);
 
-    addTotalRow("Total GST:", `Rs. ${(sale.totalTax || 0).toFixed(2)}`, true);
-
-    currentY += 2;
+    if (hasTax) {
+        addTotalRow("Total GST:", `Rs. ${(sale.totalTax || 0).toFixed(2)}`, true);
+        totalY += 2;
+    }
 
     if (sale.discount > 0) {
         addTotalRow("Discount:", `Rs. ${sale.discount.toFixed(2)}`);
     }
 
     doc.setFillColor(241, 245, 249);
-    doc.roundedRect(rightColX - 5, currentY - 5, 65, 12, 1, 1, 'F');
+    doc.roundedRect(rightColX - 5, totalY - 5, 65, 12, 1, 1, 'F');
 
-    currentY += 2;
+    totalY += 2;
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(30, 41, 59);

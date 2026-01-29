@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import styles from './billing.module.css';
 import { printInvoice } from '@/lib/invoiceUtils';
+import { differenceInDays, format } from 'date-fns';
 
 interface CartItem {
     medicineId: string;
@@ -47,11 +48,49 @@ export default function BillingPage() {
     const [lastSale, setLastSale] = useState<any>(null);
     const [showInvoiceModal, setShowInvoiceModal] = useState(false);
     const [cartPage, setCartPage] = useState(1);
+    const [isManualDiscount, setIsManualDiscount] = useState(false);
 
     const searchTimeout = useRef<any>(null);
 
 
 
+
+    const getExpiryBadge = (dateStr: string) => {
+        if (!dateStr) return null;
+        const days = differenceInDays(new Date(dateStr), new Date());
+        
+        let color = '#64748b'; // default slate
+        let bg = '#f1f5f9';
+        let text = format(new Date(dateStr), 'dd MMM yyyy');
+
+        if (days < 0) {
+            color = '#dc2626'; // red
+            bg = '#fef2f2';
+            text = `Expired ${Math.abs(days)} days ago`;
+        } else if (days <= 30) {
+            color = '#dc2626';
+            bg = '#fef2f2';
+            text = `Expires in ${days} days`;
+        } else if (days <= 90) {
+            color = '#d97706'; // orange
+            bg = '#fffbeb';
+            text = `Expires in ${Math.ceil(days/30)} months`;
+        }
+
+        return (
+            <span style={{ 
+                fontSize: '0.75rem', 
+                padding: '2px 6px', 
+                borderRadius: '4px', 
+                backgroundColor: bg, 
+                color: color,
+                fontWeight: 500,
+                marginLeft: 'auto'
+            }}>
+                {text}
+            </span>
+        );
+    };
 
     useEffect(() => {
         fetch('/api/settings')
@@ -82,6 +121,13 @@ export default function BillingPage() {
     }, [searchTerm]);
 
     const addToCart = (med: any) => {
+        // GST Logic: 
+        // 1. If "GST Number" is present -> Always apply tax.
+        // 2. If "Default GST %" is > 0 -> Always apply tax (even if number is missing).
+        // 3. Otherwise -> 0 tax.
+        const shouldApplyTax = !!(settings?.pharmacyGstNo || (settings?.defaultGstPercent && settings.defaultGstPercent > 0));
+        const effectiveGst = shouldApplyTax ? (med.gstPercentage || settings?.defaultGstPercent || 12) : 0;
+
         const existingItem = cart.find(item => item.medicineId === med._id);
         if (existingItem) {
             if (existingItem.quantity < med.quantityInStock) {
@@ -101,7 +147,7 @@ export default function BillingPage() {
                     price: med.sellingPrice || 0,
                     quantity: 1,
                     maxStock: med.quantityInStock || 0,
-                    gstPercentage: med.gstPercentage || settings?.defaultGstPercent || 12,
+                    gstPercentage: effectiveGst,
                     batchNumber: med.batchNumber || 'N/A',
                     expiryDate: med.expiryDate || ''
                 }]);
@@ -145,12 +191,13 @@ export default function BillingPage() {
         additionalDiscount = (subTotal * extraPercent) / 100;
     }
 
-    // User can still manual override if they desire, but we auto-calculate first
+    // Auto-update discount unless user has manually edited it
     useEffect(() => {
-        if (!discount && (baseDiscount || additionalDiscount)) {
-            setDiscount(parseFloat((baseDiscount + additionalDiscount).toFixed(2)));
+        if (!isManualDiscount) {
+            const calculatedDiscount = parseFloat((baseDiscount + additionalDiscount).toFixed(2));
+            setDiscount(calculatedDiscount);
         }
-    }, [subTotal, settings]);
+    }, [subTotal, settings, baseDiscount, additionalDiscount, isManualDiscount]);
 
     const totalAmount = (subTotal + totalTax) - discount;
 
@@ -269,13 +316,18 @@ export default function BillingPage() {
                                             className={styles.resultItem}
                                             onClick={() => addToCart(med)}
                                         >
-                                            <div className={styles.resultInfo}>
-                                                <strong>{med.name}</strong>
-                                                <span>{med.brandName} • {med.category}</span>
+                                            <div className={styles.resultInfo} style={{ width: '100%' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <strong>{med.name}</strong>
+                                                    {getExpiryBadge(med.expiryDate)}
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginTop: '4px' }}>
+                                                    <span className="muted-text">{med.brandName} • {med.batchNumber}</span>
+                                                </div>
                                             </div>
-                                            <div className={styles.resultPrice}>
+                                            <div className={styles.resultPrice} style={{ marginTop: '4px' }}>
                                                 <strong>₹{med.sellingPrice?.toFixed(2) || '0.00'}</strong>
-                                                <span className={med.quantityInStock < 10 ? 'text-destructive' : ''}>
+                                                <span className={med.quantityInStock < 10 ? 'text-destructive' : ''} style={{ marginLeft: '8px' }}>
                                                     {med.quantityInStock} left
                                                 </span>
                                             </div>
@@ -379,7 +431,10 @@ export default function BillingPage() {
                                     type="number"
                                     className={styles.discountInput}
                                     value={discount}
-                                    onChange={(e) => setDiscount(Number(e.target.value))}
+                                    onChange={(e) => {
+                                        setDiscount(Number(e.target.value));
+                                        setIsManualDiscount(true);
+                                    }}
                                 />
                             </div>
                             <div className={`${styles.summaryRow} mb-4`}>
@@ -438,7 +493,7 @@ export default function BillingPage() {
                         </div>
 
                         <div className={styles.modalActions}>
-                            <button className="btn btn-primary" onClick={() => printInvoice(lastSale)}>
+                            <button className="btn btn-primary" onClick={() => printInvoice(lastSale, settings)}>
                                 <Printer size={20} />
                                 <span>Print Invoice</span>
                             </button>

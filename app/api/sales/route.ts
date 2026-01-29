@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         }
 
         await connectToDatabase();
-        const settings = await Settings.findOne() || { pharmacyGstNo: '27AABCU1234F1Z5' };
+        const settings = await Settings.findOne() || {};
         const { customerName, customerContact, items, subTotal, discount, totalAmount, paymentMethod } = await request.json();
 
         // 1. Generate unique invoice number
@@ -68,7 +68,10 @@ export async function POST(request: NextRequest) {
             totalProfit += itemProfit;
 
             // Calculate GST for this item
-            const gstPercent = medicine.gstPercentage || settings.defaultGstPercent || 12;
+            // Logic: If pharmacy has GST number OR Default GST % > 0, apply tax.
+            const hasGst = !!(settings.pharmacyGstNo || (settings.defaultGstPercent && settings.defaultGstPercent > 0));
+            const gstPercent = hasGst ? (medicine.gstPercentage || settings.defaultGstPercent || 12) : 0;
+            
             const itemTax = (itemPrice * gstPercent) / 100;
             totalTax += itemTax;
 
@@ -90,6 +93,10 @@ export async function POST(request: NextRequest) {
             medicine.quantityInStock -= item.quantity;
             await medicine.save();
         }
+
+        // Adjust Total Profit by subtracting the discount given
+        // Net Profit = (Selling Price - Purchase Price) - Discount
+        totalProfit = totalProfit - discount;
 
         // Split totalTax into CGST and SGST (50/50)
         const cgstAmount = totalTax / 2;

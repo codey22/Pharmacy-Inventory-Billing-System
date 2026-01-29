@@ -1,37 +1,60 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Secret key for signing the JWT. 
+// In production, this should be in .env.local
+const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your-secret-key-change-this-in-production';
+const key = new TextEncoder().encode(SECRET_KEY);
+
+export async function encrypt(payload: any) {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('24h') // Session expires in 24 hours
+    .sign(key);
+}
+
+export async function decrypt(input: string): Promise<any> {
+  const { payload } = await jwtVerify(input, key, {
+    algorithms: ['HS256'],
+  });
+  return payload;
+}
+
+export async function getSession() {
+  const session = (await cookies()).get('session')?.value;
+  if (!session) return null;
+  try {
+    return await decrypt(session);
+  } catch (error) {
+    return null;
+  }
+}
 
 export async function checkAuthorization() {
-  const { userId } = await auth();
+  const session = await getSession();
   
-  if (!userId) {
+  if (!session) {
     return { authorized: false, error: 'Unauthorized', status: 401 };
   }
 
-  // Hardcoded check for strict single-account mode
-  // The user wants ONLY 'admin@account.com' to be able to access.
-  // We can combine this with ALLOWED_EMAILS env var for flexibility, or strictly enforce it.
-  // Given the user's strong request, we will check against the hardcoded email AND env vars if present.
-  
-  const user = await currentUser();
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
-  const username = user?.username;
-
-  // Strict check for the specific requested email or username
-  const HARDCODED_ADMIN_EMAIL = 'admin@account.com';
-  const HARDCODED_ADMIN_USERNAME = 'Admin'; 
-  const allowedEmailsEnv = process.env.ALLOWED_EMAILS || '';
-  const allowedEmails = allowedEmailsEnv.split(',').map(e => e.trim()).filter(Boolean);
-  
-  // Combine hardcoded and env
-  // Allow if email matches OR if username matches the specific admin username
-  const isEmailAllowed = userEmail && (allowedEmails.includes(userEmail) || userEmail === HARDCODED_ADMIN_EMAIL);
-  const isUsernameAllowed = username && username.toLowerCase() === HARDCODED_ADMIN_USERNAME.toLowerCase();
-
-  if (!isEmailAllowed && !isUsernameAllowed) {
-     // If neither email nor username is allowed, we block it.
-     return { authorized: false, error: 'Access Denied: You are not authorized to use this application.', status: 403 };
+  // Double check username matches the required Admin username
+  // Although login route ensures this, it's good to be defensive
+  if (session.username !== 'Admin') {
+     return { authorized: false, error: 'Access Denied', status: 403 };
   }
 
-  return { authorized: true, userId, userEmail, username };
+  return { authorized: true, user: session };
+}
+
+export async function login(formData: FormData) {
+  // This function is for Server Actions if used, 
+  // but we are using API routes for now.
+  // Leaving this as a placeholder or helper if needed.
+}
+
+export async function logout() {
+  // Destroy the session
+  (await cookies()).set('session', '', { expires: new Date(0) });
 }

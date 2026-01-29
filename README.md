@@ -27,7 +27,7 @@ PharmaManage is a comprehensive web-based application designed to streamline pha
 - **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
 - **Language**: TypeScript
 - **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
-- **Authentication**: [Clerk](https://clerk.com/)
+- **Authentication**: Custom JWT Auth (Secure, Lightweight)
 - **Styling**: CSS Modules (Modern, Responsive Design)
 - **Utilities**: 
   - `jspdf` & `jspdf-autotable` (Invoice Generation)
@@ -79,9 +79,9 @@ PharmaManage is a comprehensive web-based application designed to streamline pha
 
 ## 🔒 Security
 
-- **Authentication**: Secure user sessions managed by Clerk.
+- **Authentication**: Secure JWT-based sessions with HTTP-only cookies.
 - **Data Safety**: Server-side validation for all inventory and billing transactions.
-- **Role-Based Access**: (Configurable via Clerk)
+- **Access Control**: Protected routes and API endpoints.
 
 ## 🤝 Contributing
 
