@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
     Plus,
     Search,
@@ -10,7 +10,8 @@ import {
     Loader2,
     PackageSearch,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Upload
 } from 'lucide-react';
 import styles from './inventory.module.css';
 import MedicineForm from '@/components/MedicineForm';
@@ -38,6 +39,41 @@ export default function InventoryPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null);
+
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/inventory/import', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                fetchMedicines();
+            } else {
+                alert('Error: ' + data.error);
+                if (data.details) {
+                    console.error('Import details:', data.details);
+                }
+            }
+        } catch (err) {
+            console.error('Upload failed', err);
+            alert('Upload failed');
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     const fetchMedicines = useCallback(async () => {
         setLoading(true);
@@ -115,10 +151,29 @@ export default function InventoryPage() {
                     <h1>Medicine Inventory</h1>
                     <p className="muted-text">Manage your stock levels and medicine details</p>
                 </div>
-                <button className="btn btn-primary" onClick={openAddModal}>
-                    <Plus size={20} />
-                    <span>Add New Medicine</span>
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                        type="file"
+                        accept=".xlsx, .xls"
+                        style={{ display: 'none' }}
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                    />
+                    <button 
+                        className="btn" 
+                        style={{ backgroundColor: '#28a745', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        title="Upload Excel File with Medicine Details"
+                    >
+                        {isUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
+                        <span>Import Excel</span>
+                    </button>
+                    <button className="btn btn-primary" onClick={openAddModal}>
+                        <Plus size={20} />
+                        <span>Add New Medicine</span>
+                    </button>
+                </div>
             </header>
 
             <div className={`${styles.controls} card`}>

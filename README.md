@@ -13,7 +13,7 @@ PharmaManage is a comprehensive web-based application designed to streamline pha
 ### 💳 POS & Billing System
 - **Fast Billing**: Quick-add cart system for efficient over-the-counter sales.
 - **Dynamic Pricing**: Support for GST calculation, global discounts, and threshold-based bulk discounts.
-- **Multiple Payment Modes**: Integrated support for Cash, Card, and UPI payments (via Razorpay).
+- **Cash Payments**: Streamlined cash transaction recording.
 - **Professional Invoices**: Auto-generate and print thermal-ready PDF invoices.
 
 ### 📊 Reports & Analytics
@@ -28,7 +28,6 @@ PharmaManage is a comprehensive web-based application designed to streamline pha
 - **Language**: TypeScript
 - **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
 - **Authentication**: [Clerk](https://clerk.com/)
-- **Payments**: Razorpay
 - **Styling**: CSS Modules (Modern, Responsive Design)
 - **Utilities**: 
   - `jspdf` & `jspdf-autotable` (Invoice Generation)
@@ -61,7 +60,7 @@ PharmaManage is a comprehensive web-based application designed to streamline pha
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    CLERK_SECRET_KEY=sk_test_...
    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+   ALLOWED_EMAILS=admin@account.com
    ```
 
 4. **Run the Development Server:**

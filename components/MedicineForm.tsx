@@ -198,7 +198,7 @@ const MedicineForm = ({ isOpen, onClose, onSubmit, initialData, title }: Medicin
 
                     <div className="grid grid-2">
                         <div>
-                            <label className="label">Supplier Name</label>
+                            <label className="label">Wholesaler / Supplier Name</label>
                             <input
                                 name="supplierName"
                                 value={formData.supplierName}

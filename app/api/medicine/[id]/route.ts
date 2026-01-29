@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Medicine from '@/models/Medicine';
-import { auth } from '@clerk/nextjs/server';
+import { checkAuthorization } from '@/lib/auth-utils';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const { id } = await params;
@@ -34,9 +34,9 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const { id } = await params;
@@ -66,9 +66,9 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const { id } = await params;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Store, Percent, IndianRupee, CreditCard, ShieldCheck, Loader2, CheckCircle2 } from 'lucide-react';
+import { Save, Store, Percent, IndianRupee, Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function SettingsPage() {
     const [settings, setSettings] = useState<any>(null);
@@ -141,42 +141,6 @@ export default function SettingsPage() {
                                 value={settings.thresholdDiscountPercent}
                                 onChange={(e) => setSettings({ ...settings, thresholdDiscountPercent: Number(e.target.value) })}
                             />
-                        </div>
-                    </div>
-
-                    {/* Razorpay Integration */}
-                    <div className="card" style={{ gridColumn: 'span 2' }}>
-                        <h2 className="mb-4 flex items-center gap-2">
-                            <CreditCard size={24} className="text-success" />
-                            Razorpay Payment Gateway
-                        </h2>
-                        <div className="grid grid-2" style={{ gap: '1rem' }}>
-                            <div>
-                                <label className="label">Razorpay Key ID</label>
-                                <input
-                                    type="text"
-                                    className="input"
-                                    placeholder="rzp_test_..."
-                                    value={settings.razorpayKeyId}
-                                    onChange={(e) => setSettings({ ...settings, razorpayKeyId: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="label">Razorpay Key Secret</label>
-                                <input
-                                    type="password"
-                                    className="input"
-                                    placeholder="••••••••••••"
-                                    value={settings.razorpayKeySecret}
-                                    onChange={(e) => setSettings({ ...settings, razorpayKeySecret: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                        <div style={{ marginTop: '1rem', padding: '1rem', background: 'hsl(var(--secondary) / 0.1)', borderRadius: '8px' }}>
-                            <p style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <ShieldCheck size={16} />
-                                Payments will be processed through Razorpay Secure Checkout for Card and UPI.
-                            </p>
                         </div>
                     </div>
                 </div>

@@ -9,8 +9,8 @@ export interface ISettings {
     globalDiscountPercent: number;
     thresholdAmount: number;
     thresholdDiscountPercent: number;
-    razorpayKeyId: string;
-    razorpayKeySecret: string;
+    // razorpayKeyId: string; // Deprecated
+    // razorpayKeySecret: string; // Deprecated
 }
 
 const SettingsSchema = new Schema<ISettings>(
@@ -23,8 +23,8 @@ const SettingsSchema = new Schema<ISettings>(
         globalDiscountPercent: { type: Number, default: 5 },
         thresholdAmount: { type: Number, default: 2000 },
         thresholdDiscountPercent: { type: Number, default: 2 },
-        razorpayKeyId: { type: String, default: '' },
-        razorpayKeySecret: { type: String, default: '' },
+        // razorpayKeyId: { type: String, default: '' }, // Deprecated
+        // razorpayKeySecret: { type: String, default: '' }, // Deprecated
     },
     {
         timestamps: true,

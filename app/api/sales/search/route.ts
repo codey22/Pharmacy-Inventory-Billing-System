@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Sale from '@/models/Sale';
-import { auth } from '@clerk/nextjs/server';
+import { checkAuthorization } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         await connectToDatabase();

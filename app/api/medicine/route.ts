@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Medicine from '@/models/Medicine';
-import { auth } from '@clerk/nextjs/server';
+import { checkAuthorization } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         await connectToDatabase();
@@ -17,8 +17,19 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('query') || '';
         const category = searchParams.get('category') || '';
-        const sortBy = searchParams.get('sortBy') || 'createdAt';
-        const sortOrder = searchParams.get('sortOrder') || 'desc';
+        
+        // Default sort: if searching, prioritize expiry date (asc) to sell old stock first.
+        // Otherwise default to newest created items.
+        let defaultSortBy = 'createdAt';
+        let defaultSortOrder = 'desc';
+        
+        if (query) {
+            defaultSortBy = 'expiryDate';
+            defaultSortOrder = 'asc';
+        }
+
+        const sortBy = searchParams.get('sortBy') || defaultSortBy;
+        const sortOrder = searchParams.get('sortOrder') || defaultSortOrder;
 
         const filter: any = {};
         if (query) {
@@ -55,9 +66,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authResult = await checkAuthorization();
+        if (!authResult.authorized) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         await connectToDatabase();

@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { SignOutButton } from '@clerk/nextjs';
 import {
     LayoutDashboard,
     Package,
     CreditCard,
     BarChart3,
     Search,
-    Settings
+    Settings,
+    LogOut
 } from 'lucide-react';
 import styles from './Navbar.module.css';
 
@@ -55,7 +56,12 @@ const Navbar = () => {
                 </div>
 
                 <div className={styles.navbarActions}>
-                    <UserButton showName afterSignOutUrl="/sign-in" />
+                    <SignOutButton redirectUrl="/sign-in">
+                        <button className={styles.navItem} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'inherit' }}>
+                            <LogOut size={22} />
+                            <span>Logout</span>
+                        </button>
+                    </SignOutButton>
                 </div>
             </div>
         </nav>

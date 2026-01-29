@@ -154,73 +154,6 @@ export default function BillingPage() {
 
     const totalAmount = (subTotal + totalTax) - discount;
 
-    const handleRazorpayPayment = async () => {
-        if (!settings?.razorpayKeyId) {
-            alert('Razorpay is not configured in settings.');
-            return;
-        }
-
-        try {
-            // 1. Create Order on Server
-            const orderRes = await fetch('/api/razorpay/order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: totalAmount,
-                    receipt: `receipt_${Date.now()}`
-                })
-            });
-            const orderData = await orderRes.json();
-
-            if (!orderRes.ok) throw new Error(orderData.error);
-
-            // 2. Open Razorpay Checkout
-            const options = {
-                key: settings.razorpayKeyId,
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: settings.pharmacyName || 'PharmaManage',
-                description: 'Medicine Purchase',
-                order_id: orderData.id,
-                handler: async function (response: any) {
-                    // 3. Verify Payment on Server
-                    const verifyRes = await fetch('/api/razorpay/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
-                        })
-                    });
-
-                    if (verifyRes.ok) {
-                        // 4. Save Sale if verification succeeds
-                        await completeSale({
-                            razorpayOrderId: response.razorpay_order_id,
-                            razorpayPaymentId: response.razorpay_payment_id
-                        });
-                    } else {
-                        alert('Payment verification failed.');
-                    }
-                },
-                prefill: {
-                    name: customerName,
-                    contact: customerContact
-                },
-                theme: {
-                    color: '#3399cc'
-                }
-            };
-
-            const rzp = new (window as any).Razorpay(options);
-            rzp.open();
-        } catch (error: any) {
-            alert(`Payment failed: ${error.message}`);
-            setLoading(false);
-        }
-    };
-
     const completeSale = async (paymentDetails: any = {}) => {
         try {
             const response = await fetch('/api/sales', {
@@ -269,17 +202,12 @@ export default function BillingPage() {
     const handleSubmit = async () => {
         if (cart.length === 0) return;
         setLoading(true);
-
-        if (paymentMethod === 'Cash') {
-            await completeSale();
-        } else {
-            await handleRazorpayPayment();
-        }
+        // Only cash payments are supported now
+        await completeSale();
     };
 
     return (
         <div className={styles.billingContainer}>
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" />
             <header className={styles.header}>
                 <h1>Create New Bill</h1>
                 <p className="muted-text">Generate invoices and update stock automatically</p>
@@ -463,8 +391,7 @@ export default function BillingPage() {
                                     onChange={(e) => setPaymentMethod(e.target.value as any)}
                                 >
                                     <option value="Cash">Cash</option>
-                                    <option value="Card">Card</option>
-                                    <option value="UPI">UPI</option>
+                                    {/* Razorpay Disabled */}
                                 </select>
                             </div>
                             <div className={`${styles.summaryRow} ${styles.totalRow}`}>
