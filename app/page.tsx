@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Package,
   AlertTriangle,
@@ -21,15 +22,39 @@ export default function Dashboard() {
     expiringSoonCount: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const response = await fetch('/api/stats');
-        const data = await response.json();
-        setStats(data);
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.push('/sign-in');
+            return;
+          }
+          setError('Failed to load dashboard stats');
+          setStats({
+            totalMedicines: 0,
+            todaySalesAmount: 0,
+            todayProfit: 0,
+            lowStockCount: 0,
+            expiringSoonCount: 0
+          });
+        } else {
+          const data = await response.json();
+          setStats({
+            totalMedicines: Number(data.totalMedicines ?? 0),
+            todaySalesAmount: Number(data.todaySalesAmount ?? 0),
+            todayProfit: Number(data.todayProfit ?? 0),
+            lowStockCount: Number(data.lowStockCount ?? 0),
+            expiringSoonCount: Number(data.expiringSoonCount ?? 0)
+          });
+        }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
+        setError('Failed to load dashboard stats');
       } finally {
         setLoading(false);
       }
@@ -38,11 +63,11 @@ export default function Dashboard() {
   }, []);
 
   const statCards = [
-    { name: 'Total Medicines', value: stats.totalMedicines.toString(), icon: Package, color: styles.wrapperPrimary },
+    { name: 'Total Medicines', value: String(stats.totalMedicines ?? 0), icon: Package, color: styles.wrapperPrimary },
     { name: "Today's Sales", value: `₹${(stats.todaySalesAmount || 0).toFixed(2)}`, icon: TrendingUp, color: styles.wrapperPrimary },
     { name: "Today's Profit", value: `₹${(stats.todayProfit || 0).toFixed(2)}`, icon: TrendingUp, color: styles.wrapperSuccess },
-    { name: 'Low Stock', value: stats.lowStockCount.toString(), icon: AlertTriangle, color: styles.wrapperWarning },
-    { name: 'Expiring Soon', value: stats.expiringSoonCount.toString(), icon: Clock, color: styles.wrapperDestructive },
+    { name: 'Low Stock', value: String(stats.lowStockCount ?? 0), icon: AlertTriangle, color: styles.wrapperWarning },
+    { name: 'Expiring Soon', value: String(stats.expiringSoonCount ?? 0), icon: Clock, color: styles.wrapperDestructive },
   ];
 
   if (loading) {
@@ -72,6 +97,12 @@ export default function Dashboard() {
           </Link>
         </div>
       </header>
+
+      {error && (
+        <div className="alert alert-destructive" style={{ marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
 
       <section className={styles.statsGrid}>
         {statCards.map((stat) => {
