@@ -48,6 +48,12 @@ export default function SignInPage() {
                     <p>Secure Access</p>
                 </div>
 
+                <div className={styles.sticker}>
+                    <strong>Default Credentials</strong>
+                    <div>Username: Admin</div>
+                    <div>Password: admin@account1</div>
+                </div>
+
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.inputGroup}>
                         <label>Username</label>
